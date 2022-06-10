@@ -1,6 +1,98 @@
-#include <stdio.h>
+/*
+ * sample.cpp
+ *
+ *  Created on: 10 Jun 2022
+ *      Author: pgm
+ */
+/* ------------------------------------------------------------------------- */
+/*   Copyright (C) 2022 Peter Milne, D-TACQ Solutions Ltd
+ *                      <Peter dot Milne at D hyphen TACQ dot com>
 
-int main()
+    http://www.d-tacq.com
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of Version 2 of the GNU General Public License
+    as published by the Free Software Foundation;
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                */
+/* ------------------------------------------------------------------------- */
+
+#include <stdio.h>
+#include <unistd.h>
+#include <stdlib.h>
+#include <vector>
+#include "popt.h"
+
+using namespace std;
+
+
+namespace G {		/* put any globals in here */
+	int event_rate;		// incoming event rate, Hz
+	const char* active_channel_list = "11";
+	FILE* fp = stdout;
+	int verbose = 0;
+
+	int active_channel_count;
+	int active_channels[16];
+};
+
+struct poptOption opt_table[] = {
+	{
+	  "event_rate", 'E', POPT_ARG_INT, &G::event_rate, 0, "incoming event rate, Hz"
+	},
+	{
+	  "active_chan", 'A', POPT_ARG_STRING, &G::active_channel_list, 0, "list of channels in <S><C>,<S><C> format"
+	},
+	{
+	  "verbose", 'd', POPT_ARG_INT, &G::verbose, 0, "set debug level"
+	},
+	POPT_AUTOHELP
+	POPT_TABLEEND
+};
+
+void ui(int argc, const char** argv)
 {
-	return 0;
+	poptContext opt_context =
+			poptGetContext(argv[0], argc, argv, opt_table, 0);
+
+	int rc;
+
+	while ( (rc = poptGetNextOpt( opt_context )) >= 0 ){
+		switch(rc){
+		default:
+			;
+		}
+	}
+
+	G::active_channel_count = sscanf(G::active_channel_list, "%d,%d,%d,%d,%d,%d,%d,%d",
+			&G::active_channels[0], &G::active_channels[1], &G::active_channels[2], &G::active_channels[3],
+			&G::active_channels[4], &G::active_channels[5], &G::active_channels[6], &G::active_channels[7]
+			);
+
+	if (G::verbose){
+		fprintf(stderr, "event_rate %d Hz\n", G::event_rate);
+		fprintf(stderr, "active channels %s\n", G::active_channel_list);
+		for (int ic = 0; ic < G::active_channel_count; ++ic){
+			fprintf(stderr, "channel:%d\n", G::active_channels[ic]);
+		}
+	}
+}
+
+void simulate() {
+	unsigned long long value = 0x1234567890ABCDEF;
+
+	fwrite(&value, sizeof(unsigned long long), 1, G::fp);
+}
+
+
+int main(int argc, const char* argv[]) {
+	ui(argc, argv);
+	simulate();
 }
