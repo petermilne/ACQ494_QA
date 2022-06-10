@@ -1,5 +1,5 @@
 /*
- * sample.cpp
+ * gpx2_simulate.cpp
  *
  *  Created on: 10 Jun 2022
  *      Author: pgm
@@ -41,6 +41,8 @@ namespace G {		/* put any globals in here */
 
 	int active_channel_count;
 	int active_channels[16];
+
+	int max_events = 4;
 };
 
 struct poptOption opt_table[] = {
@@ -49,6 +51,9 @@ struct poptOption opt_table[] = {
 	},
 	{
 	  "active_chan", 'A', POPT_ARG_STRING, &G::active_channel_list, 0, "list of channels in <S><C>,<S><C> format"
+	},
+	{
+	  "max_events", 'M', POPT_ARG_INT, &G::max_events, 0, "put a limit on the number of events"
 	},
 	{
 	  "verbose", 'd', POPT_ARG_INT, &G::verbose, 0, "set debug level"
@@ -88,7 +93,10 @@ void ui(int argc, const char** argv)
 void simulate() {
 	unsigned long long value = 0x1234567890ABCDEF;
 
-	fwrite(&value, sizeof(unsigned long long), 1, G::fp);
+	for (int ii = 0; ii < G::max_events; ++ii){
+		fwrite(&value, sizeof(unsigned long long), 1, G::fp);
+		value += 1;
+	}
 }
 
 
