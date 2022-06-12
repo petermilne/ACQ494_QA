@@ -48,12 +48,17 @@ int decode(void)
 	unsigned long long tmp;
 	int event = 0;
 	while(fread(&tmp, sizeof(long long), 1, stdin) == 1){
-		if (G::verbose > 1){
+		if (G::verbose > 2){
 			fprintf(stderr, "%d,%016llx\n", event, tmp);
 		}
 		unsigned sc, nref, stop;
 		gpx_from_raw(tmp, sc, nref, stop);
-		if (G::verbose){
+		if (G::verbose == 1){
+			unsigned sc;
+			double seconds = gpx_from_raw(tmp, sc);
+			fprintf(stderr, "%6d,%2d,%14.12f\n", event, sc, seconds);
+		}
+		if (G::verbose > 1){
 			fprintf(stderr, "%6d,%2d,%8d,%8d\n", event, sc, nref, stop);
 		}
 		event += 1;

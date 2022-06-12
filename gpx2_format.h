@@ -15,6 +15,9 @@
 #define GPX_NREF_MASK	0x0000ffffff000000ULL
 #define GPX_STOP_MASK	0x0000000000ffffffULL
 
+#define EGU_NREF	100e-9
+#define EGU_STOP	1e-12
+
 /* calculating shift value at run time .. inefficient, but duplication/error free */
 int bit(unsigned long long mask){
 	for (int bit = 0; bit < 64; ++bit){
@@ -44,6 +47,14 @@ int gpx_from_raw(unsigned long long raw, unsigned& sc, unsigned& nref, unsigned&
 	nref = (raw&GPX_NREF_MASK) >> bit(GPX_NREF_MASK);
 	stop = (raw&GPX_STOP_MASK);
 	return 0;
+}
+
+double gpx_from_raw(unsigned long long raw, unsigned& sc){
+	unsigned nref, stop;
+	gpx_from_raw(raw, sc, nref, stop);
+
+	double seconds = (double)nref*EGU_NREF + (double)sc*EGU_STOP;
+	return seconds;
 }
 
 #endif /* GPX2_FORMAT_H_ */
