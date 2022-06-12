@@ -30,6 +30,8 @@
 #include <vector>
 #include "popt.h"
 
+#include "gpx2_format.h"
+
 using namespace std;
 
 
@@ -43,6 +45,8 @@ namespace G {		/* put any globals in here */
 	int active_channels[16];
 
 	int max_events = 4;
+
+	int DELTA_NREF = 1;		// @@todo assumed event_rate 10MHz
 };
 
 struct poptOption opt_table[] = {
@@ -61,6 +65,7 @@ struct poptOption opt_table[] = {
 	POPT_AUTOHELP
 	POPT_TABLEEND
 };
+
 
 void ui(int argc, const char** argv)
 {
@@ -90,12 +95,28 @@ void ui(int argc, const char** argv)
 	}
 }
 
+unsigned stop(void)
+// @@todo simulate stop value: initial + noise
+{
+	return 0x37;
+}
+
+unsigned nref_noise(void)
+// @@todo simulate nref noise
+{
+	return 0;
+}
+
+
 void simulate() {
-	unsigned long long value = 0x1234567890ABCDEF;
+	unsigned nref = 0;
 
 	for (int ii = 0; ii < G::max_events; ++ii){
-		fwrite(&value, sizeof(unsigned long long), 1, G::fp);
-		value += 1;
+		for (int jj = 0; jj < G::active_channel_count; ++jj){
+			unsigned long long raw = gpx_to_raw(G::active_channel_list[jj], nref+nref_noise(), stop());
+			fwrite(&raw, sizeof(unsigned long long), 1, G::fp);
+		}
+		nref += G::DELTA_NREF;
 	}
 }
 
