@@ -18,6 +18,7 @@
 #define EGU_NREF	100e-9
 #define EGU_STOP	1e-12
 
+
 /* calculating shift value at run time .. inefficient, but duplication/error free */
 int bit(unsigned long long mask){
 	for (int bit = 0; bit < 64; ++bit){
