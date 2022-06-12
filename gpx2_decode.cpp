@@ -81,10 +81,9 @@ int decode(void)
 		double seconds = gpx_from_raw(tmp, sc);
 
 		if (G::verbose == 1){
-
 			fprintf(stderr, "%6d,%2d,%14.12f\n", event, sc, seconds);
 		}
-		if (G::verbose > 1){
+		if (G::verbose == 2){
 			unsigned sc, nref, stop;
 			gpx_from_raw(tmp, sc, nref, stop);
 			fprintf(stderr, "%6d,%2d,%8d,%8d\n", event, sc, nref, stop);
