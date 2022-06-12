@@ -53,7 +53,7 @@ double gpx_from_raw(unsigned long long raw, unsigned& sc){
 	unsigned nref, stop;
 	gpx_from_raw(raw, sc, nref, stop);
 
-	double seconds = (double)nref*EGU_NREF + (double)sc*EGU_STOP;
+	double seconds = (double)nref*EGU_NREF + (double)stop*EGU_STOP;
 	return seconds;
 }
 
