@@ -117,8 +117,11 @@ unsigned stop(void)
 
 	// ref: https://en.cppreference.com/w/cpp/numeric/random/rand
 	if (G::stop_noise > 0){
-		int npct = std::rand()/((RAND_MAX + 1u)/G::stop_noise);
-		stop_noise = npct * GPX_STOP_MASK / 100;
+		double noisepu = (double)std::rand()/(RAND_MAX + 1u);
+		stop_noise = G::stop_noise * noisepu * GPX_STOP_MAX / 100;
+		if (G::verbose > 1){
+			fprintf(stderr, "stop() %d%%  noisepu %f %u\n", G::stop_noise, noisepu, stop_noise);
+		}
 	}
 	return G::stop0 + stop_noise;
 }

@@ -18,6 +18,7 @@
 #define EGU_NREF	100e-9
 #define EGU_STOP	1e-12
 
+#define GPX_STOP_MAX	100000
 
 /* calculating shift value at run time .. inefficient, but duplication/error free */
 int bit(unsigned long long mask){
