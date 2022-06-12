@@ -28,6 +28,10 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <vector>
+
+#include <cstdlib>
+#include <ctime>
+
 #include "popt.h"
 
 #include "gpx2_format.h"
@@ -47,6 +51,9 @@ namespace G {		/* put any globals in here */
 	int max_events = 4;
 
 	int DELTA_NREF = 1;		// @@todo assumed event_rate 10MHz
+
+	int stop0 = 0x37;		// initial stop value
+	int stop_noise = 0;		// stop noise, percent
 };
 
 struct poptOption opt_table[] = {
@@ -61,6 +68,12 @@ struct poptOption opt_table[] = {
 	},
 	{
 	  "verbose", 'd', POPT_ARG_INT, &G::verbose, 0, "set debug level"
+	},
+	{
+	  "stop0", 's', POPT_ARG_INT, &G::stop0, 0, "initial stop value"
+	},
+	{
+          "stop_noise", 0, POPT_ARG_INT, &G::stop_noise, 0, "noise on stop signal (integer %)"
 	},
 	POPT_AUTOHELP
 	POPT_TABLEEND
@@ -93,12 +106,21 @@ void ui(int argc, const char** argv)
 			fprintf(stderr, "channel:%d\n", G::active_channels[ic]);
 		}
 	}
+
+	std::srand(std::time(nullptr)); // use current time as seed for random generator
 }
 
 unsigned stop(void)
 // @@todo simulate stop value: initial + noise
 {
-	return 0x37;
+	int stop_noise = 0;
+
+	// ref: https://en.cppreference.com/w/cpp/numeric/random/rand
+	if (G::stop_noise > 0){
+		int npct = std::rand()/((RAND_MAX + 1u)/G::stop_noise);
+		stop_noise = npct * GPX_STOP_MASK / 100;
+	}
+	return G::stop0 + stop_noise;
 }
 
 unsigned nref_noise(void)
