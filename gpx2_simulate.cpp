@@ -135,7 +135,7 @@ void simulate() {
 
 	for (int ii = 0; ii < G::max_events; ++ii){
 		for (int jj = 0; jj < G::active_channel_count; ++jj){
-			unsigned long long raw = gpx_to_raw(G::active_channel_list[jj], nref+nref_noise(), stop());
+			unsigned long long raw = gpx_to_raw(G::active_channels[jj], nref+nref_noise(), stop());
 			fwrite(&raw, sizeof(unsigned long long), 1, G::fp);
 		}
 		nref += G::DELTA_NREF;
