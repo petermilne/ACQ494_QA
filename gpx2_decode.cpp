@@ -26,19 +26,60 @@
 
 
 #include <stdio.h>
+#include "popt.h"
+
+#include "gpx2_format.h"
+
+namespace G {		/* put any globals in here */
+	int verbose = 0;
+};
+
+struct poptOption opt_table[] = {
+	{
+	  "verbose", 'd', POPT_ARG_INT, &G::verbose, 0, "set debug level"
+	},
+	POPT_AUTOHELP
+	POPT_TABLEEND
+};
+
 
 int decode(void)
 {
 	unsigned long long tmp;
 	int event = 0;
 	while(fread(&tmp, sizeof(long long), 1, stdin) == 1){
-		printf("%d,%016llx\n", event, tmp);
+		if (G::verbose > 1){
+			fprintf(stderr, "%d,%016llx\n", event, tmp);
+		}
+		unsigned sc, nref, stop;
+		gpx_from_raw(tmp, sc, nref, stop);
+		if (G::verbose){
+			fprintf(stderr, "%6d,%2d,%8d,%8d\n", event, sc, nref, stop);
+		}
 		event += 1;
 	}
 	return 0;
 }
-int main()
+
+
+void ui(int argc, const char** argv)
 {
-	// ui()
+	poptContext opt_context =
+			poptGetContext(argv[0], argc, argv, opt_table, 0);
+
+	int rc;
+
+	while ( (rc = poptGetNextOpt( opt_context )) >= 0 ){
+		switch(rc){
+		default:
+			;
+		}
+	}
+}
+
+
+int main(int argc, const char* argv[])
+{
+	ui(argc, argv);
 	return decode();
 }
