@@ -24,6 +24,7 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                */
 /* ------------------------------------------------------------------------- */
 
+#include <iostream>
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
@@ -35,6 +36,7 @@
 #include "popt.h"
 
 #include "gpx2_format.h"
+#include <random>
 
 using namespace std;
 
@@ -54,6 +56,9 @@ namespace G {		/* put any globals in here */
 
 	int stop0 = 0x37;		// initial stop value
 	int stop_noise = 0;		// stop noise, percent
+
+        default_random_engine generator; 
+        normal_distribution<double> distribution(0, 1);
 };
 
 struct poptOption opt_table[] = {
@@ -115,9 +120,13 @@ unsigned stop(void)
 {
 	int stop_noise = 0;
 
+	
 	// ref: https://en.cppreference.com/w/cpp/numeric/random/rand
 	if (G::stop_noise > 0){
-		double noisepu = (double)std::rand()/(RAND_MAX + 1u);
+	        double g_noise = G::distribution(G::generator);
+		//cout << "random Gaussian noise" << g_noise << endl;
+		double noisepu = g_noise / (RAND_MAX + 1u);
+		
 		stop_noise = G::stop_noise * noisepu * GPX_STOP_MAX / 100;
 		if (G::verbose > 1){
 			fprintf(stderr, "stop() %d%%  noisepu %f %u\n", G::stop_noise, noisepu, stop_noise);
@@ -138,7 +147,7 @@ void simulate() {
 
 	for (int ii = 0; ii < G::max_events; ++ii){
 		for (int jj = 0; jj < G::active_channel_count; ++jj){
-			unsigned long long raw = gpx_to_raw(G::active_channels[jj], nref+nref_noise(), stop());
+			unsigned long long raw = gpx_to_raw(G::active_channels[jj], nref + nref_noise(), stop());
 			fwrite(&raw, sizeof(unsigned long long), 1, G::fp);
 		}
 		nref += G::DELTA_NREF;
@@ -149,4 +158,5 @@ void simulate() {
 int main(int argc, const char* argv[]) {
 	ui(argc, argv);
 	simulate();
+
 }
