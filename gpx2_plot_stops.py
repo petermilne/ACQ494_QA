@@ -12,7 +12,7 @@ def make_title(serial, ch, stops):
 	s = np.std(stops)
 	p = np.ptp(stops)
    
-	title += str(round(m, 1)) + ' ± ' + str(round(s, 1)) + ' ps ' + '(' + str(round(p, 1)) + ' ptp)'
+	title += '\n' + str(round(m, 1)) + ' ± ' + str(round(s, 1)) + ' ps ' + '(' + str(round(p, 1)) + ' ptp)'
 	return title
 
 
