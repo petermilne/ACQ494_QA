@@ -4,19 +4,8 @@ import sys
 
 path = sys.argv[1]
 
-# chunk = 64
-# f = open(path, 'rb')
-# row = 0
-# row = f.read(chunk)
-# data = []
-# while row:
-#     data.append(row)
-#     row = f.read(chunk)
-# f.close()
-
 y = np.fromfile(path, dtype=np.double)
 yn = 1e12* np.mod(y, 100e-9)
-#yn = detrend(y, 1)
 x = list(range(1, len(y) + 1))
 
 plt.subplot(311)
