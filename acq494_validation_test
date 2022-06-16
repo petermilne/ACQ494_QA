@@ -1,0 +1,29 @@
+#!/bin/bash
+
+UUT=${1:-acq2106_188}
+POST=${2:-100000}
+
+if [ ! -e ../acq400_hapi ]; then
+	echo "ERROR ../acq400_hapi NOT FOUND"
+	exit 1
+else
+	HAPI=$(dirname $PWD)/acq400_hapi		
+	export PYTHONPATH=$PYTHONPATH:$HAPI
+	echo $PYTHONPATH
+fi
+
+export SITECLIENT_TRACE=1
+python3 $HAPI/user_apps/acq400/acq400_upload.py --save_data ACQ494 \
+	--post=$POST --trg=int,rising --auto_soft_trigger 1 \
+	--trace_upload=1 --demux=0 --capture=1 ${UUT}
+ls -l ACQ494
+rm -f gpx2*.dat
+./gpx2_decode --save=1 < ACQ494/acq2106_188_CH00
+ls -l gpx2*.dat
+sha1sum gpx2*.dat
+
+for file in gpx2*dat; do
+	./gpx2_plot_stops.py --times=$file acq2106_188
+done
+
+
