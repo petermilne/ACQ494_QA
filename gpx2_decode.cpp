@@ -54,11 +54,15 @@ namespace G {		/* put any globals in here */
 	int verbose = 0;
 	int save;
 	CMAP cmap;
+	int max_events = -1;
 };
 
 struct poptOption opt_table[] = {
 	{
 	  "save", 's', POPT_ARG_INT, &G::save, 0, "set to 1 to save data"
+	},
+	{
+	  "max_events", 'M', POPT_ARG_INT, &G::max_events, 0, "put a limit on the number of events"
 	},
 	{
 	  "verbose", 'd', POPT_ARG_INT, &G::verbose, 0, "set debug level"
@@ -72,7 +76,8 @@ int decode(void)
 {
 	unsigned long long tmp;
 	int event = 0;
-	while(fread(&tmp, sizeof(long long), 1, stdin) == 1){
+
+	while(fread(&tmp, sizeof(long long), 1, stdin) == 1 && (G::max_events == -1 || event < G::max_events)){
 		if (G::verbose > 2){
 			fprintf(stderr, "%d,%016llx\n", event, tmp);
 		}
