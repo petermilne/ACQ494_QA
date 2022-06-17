@@ -1,22 +1,45 @@
-ACQ494 Channel ID
+# ACQ494 Channel ID
 
 11 : Site 1 Channel 1
 12 : Site 1 Channel 2
 ..
 24 : Site 2 Channel 4
 
-Assumed directory structure
+## Assumed directory structure
 
+```bash
 ~/PROJECTS/acq400_hapi    # copy of latest HAPI
 ~/PROJECTS/ACQ494_QA
+```
 
+### Install at D-TACQ
+
+```bash
 cd PROJECTS
 git clone git://eigg/Software/acq400_hapi
 git clone git://eigg/Software/ACQ494_QA
 cd ACQ494_QA
 git checkout --track origin/pgm1
 make
+```
 
+### Install Remote
+
+```bash
+d PROJECTS
+
+git clone https://github.com/petermilne/acq400_hapi.git
+
+# Private Repo: send me a github ID for share
+git clone https://github.com/petermilne/ACQ494_QA.git
+cd ACQ494_QA
+git checkout --track origin/pgm1
+make
+```
+
+## Capture, Decode, Analyse
+
+```bash
 ./acq494_validation_test [UUT] [1000000]
 
 [dt100@naboo ACQ494_QA]$ ls -l ACQ494
@@ -38,12 +61,13 @@ F49420002.2.png
 F49420002.4.png
 format					# ignore (for kst)
 gpx2_14.dat				# current decoded data (double seconds), channel 14
+```
 
+## low level toolz
 
-# low level toolz
+### decode to double seconds, print in ascii
 
-## decode to double seconds, print in ascii
-
+```bash
 [dt100@naboo ACQ494]$ ../gpx2_decode -M 10 -d1 < acq2106_188_CH00
      0,14,0.026379421929
      1,14,0.026379521938
@@ -55,9 +79,11 @@ gpx2_14.dat				# current decoded data (double seconds), channel 14
      7,14,0.026380121905
      8,14,0.026380221950
      9,14,0.026380321905
+```
 
-## decode to NREFS, STOPS fields
+### decode to NREFS, STOPS fields
 
+```bash
 [dt100@naboo ACQ494]$ ../gpx2_decode -M 10 -d2 < acq2106_188_CH00
      0,14,  263794,   21929
      1,14,  263795,   21938
@@ -69,10 +95,11 @@ gpx2_14.dat				# current decoded data (double seconds), channel 14
      7,14,  263801,   21905
      8,14,  263802,   21950
      9,14,  263803,   21905
+```
 
+### decode raw binary (FPGA wire format)
 
-## decode raw binary (FPGA wire format)
-
+```bash
 [dt100@naboo ACQ494]$ ../gpx2_decode -M 10 -d3 < acq2106_188_CH00
 0,01040406720055a9
 1,01040406730055b2
@@ -81,7 +108,7 @@ gpx2_14.dat				# current decoded data (double seconds), channel 14
 4,01040406760055a5
 5,010404067700559a
 6,0104040678005594
-
+```
 
 
 
