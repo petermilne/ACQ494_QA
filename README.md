@@ -26,7 +26,7 @@ make
 ### Install Remote
 
 ```bash
-d PROJECTS
+cd PROJECTS
 
 git clone https://github.com/petermilne/acq400_hapi.git
 
