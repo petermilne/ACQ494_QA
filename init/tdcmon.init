@@ -1,7 +1,8 @@
 
 echo ++tdcmon.init
-ttyd -p 8080 watch -n2 /usr/local/CARE/TDC/monitor 1 8   2>&1 &
-ttyd -p 8081 watch -n2 /usr/local/CARE/TDC/monitor 2 20 2>&1 &
+ttyd -R -p 8080 watch -n2 /usr/local/CARE/TDC/monitor 1 8   2>&1 &
+ttyd -R -p 8081 watch -n2 /usr/local/CARE/TDC/monitor 2 20  2>&1 &
+ttyd -p 8082 /bin/login 2>&1 &
 
 SERVER=$(/usr/local/CARE/get-ip-address)
 sed -i /var/www/d-tacq/acq_home_page.html \
