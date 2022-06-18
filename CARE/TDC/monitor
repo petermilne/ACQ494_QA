@@ -1,0 +1,4 @@
+mode=${1:-1}
+max=${2:-10}
+mmap -f /dev/acq400.0.hb/002 | /mnt/local/gpx2_decode -M$max -d$mode
+
