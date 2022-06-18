@@ -1,4 +1,27 @@
 mode=${1:-1}
 max=${2:-10}
-mmap -f /dev/acq400.0.hb/002 | /usr/local/bin/gpx2_decode -M$max -d$mode
+
+export red="\033[1;31m"
+export green="\033[1;32m"
+export yellow="\033[1;33m"
+export blue="\033[1;34m"
+export purple="\033[1;35m"
+export cyan="\033[1;36m"
+export grey="\033[0;37m"
+export reset="\033[m"
+
+colorize() {
+	read 
+	echo -e ${blue}$REPLY
+	read
+	echo $REPLY | grep -q 'not valid'
+	if [ $? -eq 0 ]; then
+		echo -e "${red}$REPLY"
+	else
+		echo -e "${reset}$REPLY"
+	fi
+	cat -
+}
+
+mmap -f /dev/acq400.0.hb/002 | /usr/local/bin/gpx2_decode -M$max -d$mode 2>&1 | colorize
 
