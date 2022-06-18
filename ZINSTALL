@@ -1,0 +1,3 @@
+ln -s ../../ACQ420FMC/make.zynq
+ln -s ../../ACQ420FMC/popt.h
+
