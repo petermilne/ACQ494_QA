@@ -11,14 +11,16 @@ export grey="\033[0;37m"
 export reset="\033[m"
 
 colorize() {
-	read 
-	echo -e ${blue}$REPLY
-	read
-	echo $REPLY | grep -q 'not valid'
-	if [ $? -eq 0 ]; then
-		echo -e "${red}$REPLY"
-	else
-		echo -e "${reset}$REPLY"
+	if [ "x$TERM" = "xxterm-256color" ]; then
+		read 
+		echo -e ${blue}$REPLY
+		read
+		echo $REPLY | grep -q 'not valid'
+		if [ $? -eq 0 ]; then
+			echo -e "${red}$REPLY"
+		else
+			echo -e "${reset}$REPLY"
+		fi
 	fi
 	cat -
 }
