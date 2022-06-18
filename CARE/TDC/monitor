@@ -13,7 +13,7 @@ export reset="\033[m"
 colorize() {
 	if [ "x$TERM" = "xxterm-256color" ]; then
 		read 
-		echo -e ${blue}$REPLY
+		echo -e "${blue}$REPLY"
 		read
 		echo $REPLY | grep -q 'not valid'
 		if [ $? -eq 0 ]; then
