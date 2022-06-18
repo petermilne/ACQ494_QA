@@ -89,7 +89,12 @@ int decode(void)
 			if (event == 0){
 				fprintf(stderr, "%6s,%2s,%14s\n", "evt", "sc", "seconds");
 			}
-			fprintf(stderr, "%6d,%2d,%14.12f\n", event, sc, seconds);
+			if (gpx2_valid_sc(sc)){
+				fprintf(stderr, "%6d,%2d,%14.12f\n", event, sc, seconds);
+			}else{
+				fprintf(stderr, "data not valid\n");
+				return 1;
+			}
 		}
 		if (G::verbose == 2){
 			if (event == 0){
@@ -97,7 +102,12 @@ int decode(void)
 			}
 			unsigned sc, nref, stop;
 			gpx_from_raw(tmp, sc, nref, stop);
-			fprintf(stderr, "%6d,%2d,%8d,%8d\n", event, sc, nref, stop);
+			if (gpx2_valid_sc(sc)){
+				fprintf(stderr, "%6d,%2d,%8d,%8d\n", event, sc, nref, stop);
+			}else{
+				fprintf(stderr, "data not valid\n");
+				return 1;
+			}
 		}
 		event += 1;
 

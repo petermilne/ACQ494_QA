@@ -59,4 +59,10 @@ double gpx_from_raw(unsigned long long raw, unsigned& sc){
 	return seconds;
 }
 
+// sc==0 : TAI seconds
+bool gpx2_valid_sc(unsigned sc){
+	unsigned site = sc/10;
+	unsigned ch = sc%10;
+	return site>=0 && site<=6 && ch>=0 && ch<=4;
+}
 #endif /* GPX2_FORMAT_H_ */
