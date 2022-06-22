@@ -18,12 +18,12 @@ python3 $HAPI/user_apps/acq400/acq400_upload.py --save_data ACQ494 \
 	--trace_upload=1 --demux=0 --capture=1 ${UUT}
 ( cd ACQ494
 rm -f gpx2*.dat
-../gpx2_decode --save=1 < acq2106_188_CH00
+../gpx2_decode --save=1 < ${UUT}_CH00
 ls -l gpx2*.dat
 sha1sum gpx2*.dat
 
 for file in gpx2*dat; do
-	../gpx2_plot_stops.py --times=$file acq2106_188
+	../gpx2_plot_stops.py --times=$file ${UUT}
 done
 )
 ls -l ACQ494
