@@ -49,6 +49,8 @@ namespace GPX_BITS {
 	const unsigned PPSSIG = bit(GPX_PPSSIG_MASK);
 	const unsigned PPSREF = bit(GPX_PPSREF_MASK);
 	const unsigned PPSTAI = bit(GPX_PPSTAI_MASK);
+
+	const unsigned PPSID  = GPX_PPSSIG >> PPSSIG;
 };
 
 unsigned long long gpx_to_raw(unsigned sc, unsigned nref, unsigned stop){

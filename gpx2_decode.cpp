@@ -71,6 +71,7 @@ struct poptOption opt_table[] = {
 	POPT_TABLEEND
 };
 
+const unsigned PPSSIG = GPX_PPSSIG >> GPX_BITS::PPSSIG;
 
 int decode(void)
 {
@@ -85,7 +86,9 @@ int decode(void)
 		short nref_snap;
 
 		if (gpx2_is_pps(tmp, tai, nref_snap)) {
-			fprintf(stderr, "gpx2_is_pps %llu %04x\n", tai, nref_snap);
+			if (G::verbose){
+				fprintf(stderr, "%6d,%2x,%llu,%04x\n", event, PPSSIG, tai, nref_snap);
+			}
 			continue;
 		}
 		unsigned sc;
