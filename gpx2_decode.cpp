@@ -81,7 +81,13 @@ int decode(void)
 		if (G::verbose > 2){
 			fprintf(stderr, "%d,%016llx\n", event, tmp);
 		}
+		unsigned long long tai;
+		short nref_snap;
 
+		if (gpx2_is_pps(tmp, tai, nref_snap)) {
+			fprintf(stderr, "gpx2_is_pps %llu %04x\n", tai, nref_snap);
+			continue;
+		}
 		unsigned sc;
 		double seconds = gpx_from_raw(tmp, sc);
 

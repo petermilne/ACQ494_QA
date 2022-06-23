@@ -22,6 +22,12 @@
 
 #define GPX_STOP_MAX	100000
 
+#define GPX_PPSSIG_MASK 0xff00000000000000ULL
+#define GPX_PPSREF_MASK 0x00ffff0000000000ULL
+#define GPX_PPSTAI_MASK 0x000000ffffffffffULL
+
+#define GPX_PPSSIG	0xa100000000000000ULL
+
 /* calculating shift value at run time .. inefficient, but duplication/error free */
 int bit(unsigned long long mask){
 	for (int bit = 0; bit < 64; ++bit){
@@ -39,6 +45,10 @@ namespace GPX_BITS {
 	const unsigned FLAGS = bit(GPX_FLAGS_MASK);
 	const unsigned NREF = bit(GPX_NREF_MASK);
 	const unsigned STOP = bit(GPX_STOP_MASK);
+
+	const unsigned PPSSIG = bit(GPX_PPSSIG_MASK);
+	const unsigned PPSREF = bit(GPX_PPSREF_MASK);
+	const unsigned PPSTAI = bit(GPX_PPSTAI_MASK);
 };
 
 unsigned long long gpx_to_raw(unsigned sc, unsigned nref, unsigned stop){
@@ -73,5 +83,16 @@ bool gpx2_valid_sc(unsigned sc){
 	unsigned site = sc/10;
 	unsigned ch = sc%10;
 	return site>=0 && site<=6 && ch>=0 && ch<=4;
+}
+
+
+bool gpx2_is_pps(unsigned long long raw, unsigned long long& tai, short& nref) {
+	if ((raw&GPX_PPSSIG_MASK) == GPX_PPSSIG){
+		tai = raw&GPX_PPSTAI_MASK;
+		nref = (raw&GPX_PPSREF_MASK) >> GPX_BITS::PPSREF;
+		return true;
+	}else{
+		return false;
+	}
 }
 #endif /* GPX2_FORMAT_H_ */
