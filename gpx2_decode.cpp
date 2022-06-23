@@ -140,11 +140,6 @@ int decode(void)
 		fread(&tmp, sizeof(long long), 1, stdin) == 1 &&
 		(G::max_events == -1 || event < G::max_events);
 								event++ ){
-
-		if ((tmp&GPX_FILLER_MASK) == GPX_FILLER){
-			continue;
-		}
-
 		if (event == 0){ 
 			switch(G::verbose){
 			case 1:
@@ -152,6 +147,12 @@ int decode(void)
 			case 2:
 				fprintf(stderr, "%6s,%2s,%8s,%8s\n", "evt", "sc", "NREF", "STOP");
 			}
+		}
+		if (G::verbose > 3){
+			fprintf(stderr, "%d,%016llx\n", event, tmp);
+		}
+		if ((tmp&GPX_FILLER_MASK) == GPX_FILLER){
+			continue;
 		}
 		if (G::verbose > 2){
 			fprintf(stderr, "%d,%016llx\n", event, tmp);
