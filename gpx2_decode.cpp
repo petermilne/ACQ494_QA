@@ -116,11 +116,28 @@ const unsigned PPSSIG = GPX_PPSSIG >> GPX_BITS::PPSSIG;
  * Bits [47:16]: Nanoseconds (32 bits). This field overflows at 1 billion.
  * Bits [15:0]: Fractions of nanosecond (16 bits). This field is a true fraction; it overflows at 0xFFFF.
  *
- * FIRST up: let's not try pack it.. store 64, 32, 32
+ * FIRST up: let's not try pack it.. store 64, 32, 32 TAI128
+ *
+ * OK< here's the plan: shift and split into an array of 6 u16's
  */
+
+typedef unsigned short B96[6];
+
+#define WMASK 	0x0000ffff
 
 void store1558v2(FILE* fp, unsigned long long tai, unsigned nref, unsigned stop, short nref_snap)
 {
+	unsigned nsec = nref * 100;
+	unsigned frac_nsec = stop * 65535/1000;
+	B96 b96;
+	b96[0] = tai >> 32;
+	b96[1] = (tai >> 16) & WMASK;
+	b96[2] = tai & WMASK;
+	b96[3] = nsec >> 16;
+	b96[4] = nsec & WMASK;
+	b96[5] = frac_nsec;
+	fwrite(&b96, sizeof(short), 6, fp);
+
 	assert(0);
 }
 void storeTAI128(FILE* fp, unsigned long long tai, unsigned nref, unsigned stop, short nref_snap)
