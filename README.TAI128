@@ -1,0 +1,25 @@
+TAI128 is an unpacked TAI time
+
+u64 TAI s
+u32 NREF 
+u32 STOP
+
+Store like this:
+
+nc -i1 acq2106_188 53000 | pv > acq2106_188.raw
+
+Decode like this:
+
+./gpx2_decode --TAI128=1 < acq2106_188.raw
+
+Here it is! :
+pgm@hoy5 ACQ494_QAZ]$ ls -l gpx2_11.TAI128
+-rw-rw-r-- 1 pgm pgm 1599968 Jun 23 16:39 gpx2_11.TAI128
+
+Plot
+python ./plot.TAI128.py gpx2_11.TAI128
+
+Plots the fields,  then 
+Plots time in seconds since start, and histograms y[n+1]-y[n] to get deltas.
+
+

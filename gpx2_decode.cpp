@@ -39,6 +39,7 @@ namespace G {		/* put any globals in here */
 	int verbose = 0;
 	int save;
 	int do1588v2 = 0;
+	int doTAI128 = 0;
 	int max_events = -1;
 };
 
@@ -49,6 +50,7 @@ struct ChannelData {
 	int sc;
 	FILE *fp;
 	FILE *fp1588v2;
+	FILE *fpTAI128;
 
 	static CMAP cmap;
 	ChannelData(int _sc): sc(_sc) {
@@ -59,7 +61,12 @@ struct ChannelData {
 		if (G::do1588v2){
 			snprintf(fname, 80, "gpx2_%02d.1588v2", sc);
 			fp1588v2 = fopen(fname, "w");
-                	assert(fp);
+                	assert(fp1588v2);
+		}
+		if (G::doTAI128){
+			snprintf(fname, 80, "gpx2_%02d.TAI128", sc);
+			fpTAI128 = fopen(fname, "w");
+                	assert(fpTAI128);
 		}
 	}
 	ChannelData(): sc(0), fp(0) {}
@@ -89,6 +96,9 @@ struct poptOption opt_table[] = {
 	  "1588v2", 0, POPT_ARG_INT, &G::do1588v2, 0, "set to 1 to save 1588 style"
 	},
 	{
+	  "TAI128", 0, POPT_ARG_INT, &G::doTAI128, 0, "set to 1 to save TAI:64, NREF:32 STOP:32" 
+        },
+	{
 	  "max_events", 'M', POPT_ARG_INT, &G::max_events, 0, "put a limit on the number of events"
 	},
 	{
@@ -100,9 +110,27 @@ struct poptOption opt_table[] = {
 
 const unsigned PPSSIG = GPX_PPSSIG >> GPX_BITS::PPSSIG;
 
+/* 1588v2:
+ * https://www.intel.com/content/www/us/en/docs/programmable/683639/21-1-19-4-0/ptp-timestamp-and-tod-formats.html
+ * Bits [95:48]: Seconds (48 bits).
+ * Bits [47:16]: Nanoseconds (32 bits). This field overflows at 1 billion.
+ * Bits [15:0]: Fractions of nanosecond (16 bits). This field is a true fraction; it overflows at 0xFFFF.
+ *
+ * FIRST up: let's not try pack it.. store 64, 32, 32
+ */
+
 void store1558v2(FILE* fp, unsigned long long tai, unsigned nref, unsigned stop, short nref_snap)
 {
-	;
+	assert(0);
+}
+void storeTAI128(FILE* fp, unsigned long long tai, unsigned nref, unsigned stop, short nref_snap)
+{
+	if (nref_snap != 0){
+		fprintf(stderr, "WARNING: store1558v2() %16llu %8u %8llu %d\n", tai, nref, stop, nref_snap);
+	}
+	fwrite(&tai, sizeof(tai), 1, fp);
+	fwrite(&nref, sizeof(nref), 1, fp);
+	fwrite(&stop, sizeof(stop), 1, fp);
 }
 int decode(void)
 {
@@ -166,6 +194,14 @@ int decode(void)
 			}else{
 				fprintf(stderr, "ERROR: bad sc\n");
 			}
+		}
+		if (G::doTAI128){
+			if (gpx2_valid_sc(sc)){
+				storeTAI128(ChannelData::factory(sc).fpTAI128, tai, nref, stop, nref_snap);
+			}else{
+				fprintf(stderr, "ERROR: bad sc\n");
+			}
+
 		}
 	}
 	return 0;
