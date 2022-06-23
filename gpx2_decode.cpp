@@ -35,10 +35,14 @@ using namespace std;
 
 #include "gpx2_format.h"
 
+struct ChannelData;
+typedef map<unsigned, ChannelData> CMAP;
+
 struct ChannelData {
 	int sc;
 	FILE *fp;
 
+	static CMAP cmap;
 	ChannelData(int _sc): sc(_sc) {
 		char fname[80];
 		snprintf(fname, 80, "gpx2_%02d.dat", sc);
@@ -46,14 +50,27 @@ struct ChannelData {
 		assert(fp);
 	}
 	ChannelData(): sc(0), fp(0) {}
+
+	static ChannelData& factory(int sc);
 };
+CMAP ChannelData::cmap;
 
-typedef map<unsigned, ChannelData> CMAP;
+ChannelData& ChannelData::factory(int sc) {
+	auto _cmap = cmap.find(sc);
+	FILE* fp;
+	if (_cmap != cmap.end()){
+		return _cmap->second;
+	}else{
+		ChannelData* cdata = new ChannelData(sc);
+		cmap[sc] = *cdata;
+		return *cdata;
+	}
 
+}
 namespace G {		/* put any globals in here */
 	int verbose = 0;
 	int save;
-	CMAP cmap;
+
 	int max_events = -1;
 };
 
@@ -75,9 +92,12 @@ struct poptOption opt_table[] = {
 int decode(void)
 {
 	unsigned long long tmp;
-	int event = 0;
 
-	while(fread(&tmp, sizeof(long long), 1, stdin) == 1 && (G::max_events == -1 || event < G::max_events)){
+	for (int event = 0;
+		fread(&tmp, sizeof(long long), 1, stdin) == 1 &&
+		(G::max_events == -1 || event < G::max_events);
+								event++ ){
+
 		if (G::verbose > 2){
 			fprintf(stderr, "%d,%016llx\n", event, tmp);
 		}
@@ -93,19 +113,8 @@ int decode(void)
 			gpx_from_raw(tmp, sc, nref, stop);
 			fprintf(stderr, "%6d,%2d,%8d,%8d\n", event, sc, nref, stop);
 		}
-		event += 1;
-
 		if (G::save){
-			auto cmap = G::cmap.find(sc);
-			FILE* fp;
-			if (cmap != G::cmap.end()){
-				fp = cmap->second.fp;
-			}else{
-				ChannelData* cdata = new ChannelData(sc);
-				G::cmap[sc] = *cdata;
-				fp = cdata->fp;
-			}
-			fwrite(&seconds, sizeof(double), 1, fp);
+			fwrite(&seconds, sizeof(double), 1, ChannelData::factory(sc).fp);
 		}
 	}
 	return 0;
