@@ -35,12 +35,20 @@ using namespace std;
 
 #include "gpx2_format.h"
 
+namespace G {		/* put any globals in here */
+	int verbose = 0;
+	int save;
+	int do1588v2 = 0;
+	int max_events = -1;
+};
+
 struct ChannelData;
 typedef map<unsigned, ChannelData> CMAP;
 
 struct ChannelData {
 	int sc;
 	FILE *fp;
+	FILE *fp1588v2;
 
 	static CMAP cmap;
 	ChannelData(int _sc): sc(_sc) {
@@ -48,6 +56,11 @@ struct ChannelData {
 		snprintf(fname, 80, "gpx2_%02d.dat", sc);
 		fp = fopen(fname, "w");
 		assert(fp);
+		if (G::do1588v2){
+			snprintf(fname, 80, "gpx2_%02d.1588v2", sc);
+			fp1588v2 = fopen(fname, "w");
+                	assert(fp);
+		}
 	}
 	ChannelData(): sc(0), fp(0) {}
 
@@ -67,16 +80,13 @@ ChannelData& ChannelData::factory(int sc) {
 	}
 
 }
-namespace G {		/* put any globals in here */
-	int verbose = 0;
-	int save;
-
-	int max_events = -1;
-};
 
 struct poptOption opt_table[] = {
 	{
 	  "save", 's', POPT_ARG_INT, &G::save, 0, "set to 1 to save data"
+	},
+	{
+	  "1588v2", 0, POPT_ARG_INT, &G::do1588v2, 0, "set to 1 to save 1588 style"
 	},
 	{
 	  "max_events", 'M', POPT_ARG_INT, &G::max_events, 0, "put a limit on the number of events"
@@ -90,6 +100,10 @@ struct poptOption opt_table[] = {
 
 const unsigned PPSSIG = GPX_PPSSIG >> GPX_BITS::PPSSIG;
 
+void store1558v2(FILE* fp, unsigned long long tai, unsigned nref, unsigned stop, short nref_snap)
+{
+	;
+}
 int decode(void)
 {
 	unsigned long long tmp;
@@ -99,15 +113,25 @@ int decode(void)
 		(G::max_events == -1 || event < G::max_events);
 								event++ ){
 
+		if (event == 0){ 
+			switch(G::verbose){
+			case 1:
+				fprintf(stderr, "%6s,%2s,%14s\n", "evt", "sc", "seconds");
+			case 2:
+				fprintf(stderr, "%6s,%2s,%8s,%8s\n", "evt", "sc", "NREF", "STOP");
+			}
+		}
 		if (G::verbose > 2){
 			fprintf(stderr, "%d,%016llx\n", event, tmp);
 		}
+		unsigned long long raw_pps;
 		unsigned long long tai;
 		short nref_snap;
 
 		if (gpx2_is_pps(tmp, tai, nref_snap)) {
+			raw_pps = tmp;
 			if (G::verbose){
-				fprintf(stderr, "%6d,%2x,%llu,%04x\n", event, PPSSIG, tai, nref_snap);
+				fprintf(stderr, "%6d,%2x,%32llu,%04x\n", event, PPSSIG, tai, nref_snap);
 			}
 			continue;
 		}
@@ -115,9 +139,6 @@ int decode(void)
 		double seconds = gpx_from_raw(tmp, sc);
 
 		if (G::verbose == 1){
-			if (event == 0){
-				fprintf(stderr, "%6s,%2s,%14s\n", "evt", "sc", "seconds");
-			}
 			if (gpx2_valid_sc(sc)){
 				fprintf(stderr, "%6d,%2d,%14.12f\n", event, sc, seconds);
 			}else{
@@ -125,12 +146,10 @@ int decode(void)
 				return 1;
 			}
 		}
+		unsigned nref, stop;
+		gpx_from_raw(tmp, sc, nref, stop);
+
 		if (G::verbose == 2){
-			if (event == 0){
-				fprintf(stderr, "%6s,%2s,%8s,%8s\n", "evt", "sc", "NREF", "STOP");
-			}
-			unsigned sc, nref, stop;
-			gpx_from_raw(tmp, sc, nref, stop);
 			if (gpx2_valid_sc(sc)){
 				fprintf(stderr, "%6d,%2d,%8d,%8d\n", event, sc, nref, stop);
 			}else{
@@ -140,6 +159,13 @@ int decode(void)
 		}
 		if (G::save){
 			fwrite(&seconds, sizeof(double), 1, ChannelData::factory(sc).fp);
+		}
+		if (G::do1588v2){
+			if (gpx2_valid_sc(sc)){
+				store1558v2(ChannelData::factory(sc).fp1588v2, tai, nref, stop, nref_snap);
+			}else{
+				fprintf(stderr, "ERROR: bad sc\n");
+			}
 		}
 	}
 	return 0;
