@@ -141,6 +141,10 @@ int decode(void)
 		(G::max_events == -1 || event < G::max_events);
 								event++ ){
 
+		if ((tmp&GPX_FILLER_MASK) == GPX_FILLER){
+			continue;
+		}
+
 		if (event == 0){ 
 			switch(G::verbose){
 			case 1:
@@ -152,6 +156,7 @@ int decode(void)
 		if (G::verbose > 2){
 			fprintf(stderr, "%d,%016llx\n", event, tmp);
 		}
+
 		unsigned long long raw_pps;
 		unsigned long long tai;
 		short nref_snap;
