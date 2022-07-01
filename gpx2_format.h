@@ -27,6 +27,8 @@
 #define GPX_PPSTAI_MASK 0x000000ffffffffffULL
 
 #define GPX_PPSSIG	0xa100000000000000ULL
+#define GPX_FILLER_MASK 0xffff000000000000ULL
+#define GPX_FILLER	0xaa55000000000000ULL
 
 /* calculating shift value at run time .. inefficient, but duplication/error free */
 int bit(unsigned long long mask){
