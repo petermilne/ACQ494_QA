@@ -137,8 +137,6 @@ void store1558v2(FILE* fp, unsigned long long tai, unsigned nref, unsigned stop,
 	b96[4] = nsec & WMASK;
 	b96[5] = frac_nsec;
 	fwrite(&b96, sizeof(short), 6, fp);
-
-	assert(0);
 }
 void storeTAI128(FILE* fp, unsigned long long tai, unsigned nref, unsigned stop, short nref_snap)
 {
