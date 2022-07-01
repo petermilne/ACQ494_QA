@@ -19,7 +19,7 @@ python3 $HAPI/user_apps/acq400/acq400_upload.py --save_data ACQ494 \
 ( cd ACQ494
 for uut in $UUT; do
 	rm -f gpx2*.dat
-	../gpx2_decode --save=1 --TAI128=1 < ${uut}_CH00
+	../gpx2_decode --save=1 --TAI128=1 --1588v2=1 < ${uut}_CH00
 	ls -l gpx2*.dat
 	sha1sum gpx2*.dat
 	mkdir -p $uut; mv gpx2* $uut
@@ -27,8 +27,11 @@ for uut in $UUT; do
 #		for file in gpx2*dat; do
 #		../../gpx2_plot_stops.py --times=$file ${UUT}
 #done
-		for file in gpx2*TAI128; do
-			../../plot.TAI128.py $file ${UUT}
+#		for file in gpx2*TAI128; do
+#			../../plot.TAI128.py $file ${UUT}
+#		done
+		for file in gpx2*1588v2; do
+			../../plot.1588v2.py $file ${UUT}
 		done
 	)
 done
