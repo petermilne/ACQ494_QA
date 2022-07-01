@@ -38,16 +38,24 @@ plt.tight_layout()
 plt.show(block=1)
 
 
-plt.subplot(211)
+plt.subplot(311)
 plt.title("{} Plot Time in sec from start".format(path))
 plt.plot(shot_times)
 plt.ylabel("Time from Start")
 plt.xlabel("Sample")
 
 dt = np.multiply(np.subtract(shot_times[1:],shot_times[0:-1]), 1e12)
-plt.subplot(212)
+plt.subplot(312)
 plt.hist(dt, bins=100)
 plt.xlabel("time ps")
 plt.ylabel("Frequency")
 
+plt.subplot(313)
+dtus = np.multiply(np.subtract(shot_times[1:],shot_times[0:-1]), 1e6)
+print(dtus[0:10])
+dtus[0] = 9
+dtus[1] = 11
+plt.plot(dtus)
+plt.xlabel("sample")
+plt.ylabel("DT [us]")
 plt.show()
