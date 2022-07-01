@@ -127,8 +127,8 @@ typedef unsigned short B96[6];
 
 void store1558v2(FILE* fp, unsigned long long tai, unsigned nref, unsigned stop, short nref_snap)
 {
-	unsigned nsec = nref * 100;
-	unsigned frac_nsec = stop * 65535/1000;
+	unsigned nsec = nref * 100 + stop/1000;
+	unsigned frac_nsec = (stop%1000) * 65535/1000;
 	B96 b96;
 	b96[0] = tai >> 32;
 	b96[1] = (tai >> 16) & WMASK;
