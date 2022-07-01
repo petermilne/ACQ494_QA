@@ -10,6 +10,27 @@ dt = np.dtype([('tai', np.uint64), ('nref', np.uint32), ('stop', np.uint32)])
 #print dt
 y = np.fromfile(path, dtype=dt)
 
+t0 = y['tai'][0]
+shot_sec = np.subtract(y['tai'], t0)
+shot_times_ref = np.add(shot_sec, np.multiply(y['nref'], 100e-9))
+shot_times = np.add(shot_times_ref, np.multiply(y['stop'], 1e-12))
+
+def make_title(serial, ch, stops):
+    title = 'ACQ494FMC Delta Times {} ch {}'.format(serial, ch)
+    m = np.mean(stops)
+    s = np.std(stops)*1e6
+    p = np.ptp(stops)*1e6
+    title += '\n' + str(round(m, 1)) + ' ± ' + str(round(s, 1)) + ' ps ' + '(' + str(round(p, 1)) + ' ptp)'
+    return title
+
+dtus = np.multiply(np.subtract(shot_times[1:],shot_times[0:-1]), 1e6)
+plt.title(make_title("123", 1, dtus))
+plt.xlabel("sample")
+plt.ylabel("DT [us]")
+plt.plot(dtus)
+plt.show()
+
+#sys.exit()
 plt.subplot(311)
 plt.plot(y['tai'])
 plt.ylabel("TAI")
@@ -27,13 +48,6 @@ plt.plot(y['stop'])
 plt.ylabel("STOP")
 plt.xlabel("Sample")
 plt.title("")
-
-t0 = y['tai'][0]
-
-shot_sec = np.subtract(y['tai'], t0)
-shot_times_ref = np.add(shot_sec, np.multiply(y['nref'], 100e-9))
-shot_times = np.add(shot_times_ref, np.multiply(y['stop'], 1e-12))
-
 plt.tight_layout()
 plt.show(block=1)
 
@@ -59,3 +73,5 @@ plt.plot(dtus)
 plt.xlabel("sample")
 plt.ylabel("DT [us]")
 plt.show()
+
+
