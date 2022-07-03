@@ -360,7 +360,7 @@ int do_stream_1588v2(int ibuf, FILE* fp) {
 			gpx_from_raw(tmp, sc, nref, stop);
 
 			if (gpx2_valid_sc(sc)){
-				storeTAI128(stdout, tai, nref, stop, nref_snap);
+				store1558v2(stdout, tai, nref, stop, nref_snap);
 			}else{
 				fprintf(stderr, "data not valid %016llx\n", tmp);
 				return 1;
