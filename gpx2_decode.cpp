@@ -150,18 +150,20 @@ void storeTAI128(FILE* fp, unsigned long long tai, unsigned nref, unsigned stop,
 int decode(void)
 {
 	unsigned long long tmp;
+	bool header_printed = false;
 
 	for (int event = 0;
 		fread(&tmp, sizeof(long long), 1, stdin) == 1 &&
 		(G::max_events == -1 || event < G::max_events);
 								event++ ){
-		if (event == 0){ 
+		if (!header_printed){
 			switch(G::verbose){
 			case 1:
 				fprintf(stderr, "%6s,%2s,%14s\n", "evt", "sc", "seconds");
 			case 2:
 				fprintf(stderr, "%6s,%2s,%8s,%8s\n", "evt", "sc", "NREF", "STOP");
 			}
+			header_printed = true;
 		}
 		if (G::verbose > 3){
 			fprintf(stderr, "%d,%016llx\n", event, tmp);
