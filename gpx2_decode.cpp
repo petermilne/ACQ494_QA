@@ -323,7 +323,7 @@ int taigui(void)
 			return -2;
 		}
 		if (G::verbose){
-			fprintf(stderr, "%03d\n", ibuf);
+			fprintf(stderr, "%03d,", ibuf); fflush(stderr);
 		}
 		taigui_handle_buffer(ibuf, bfp);
 		fclose(bfp);
