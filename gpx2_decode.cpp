@@ -137,6 +137,9 @@ typedef unsigned short B96[6];
 
 void store1558v2(FILE* fp, unsigned long long tai, unsigned nref, unsigned stop, short nref_snap)
 {
+	if (nref_snap != 0){
+		fprintf(stderr, "WARNING: store1558v2() %16llu %8u %8llu %d\n", tai, nref, stop, nref_snap);
+	}
 	unsigned nsec = nref * 100 + stop/1000;
 	unsigned frac_nsec = (stop%1000) * 65535/1000;
 	B96 b96;
@@ -151,7 +154,7 @@ void store1558v2(FILE* fp, unsigned long long tai, unsigned nref, unsigned stop,
 void storeTAI128(FILE* fp, unsigned long long tai, unsigned nref, unsigned stop, short nref_snap)
 {
 	if (nref_snap != 0){
-		fprintf(stderr, "WARNING: store1558v2() %16llu %8u %8llu %d\n", tai, nref, stop, nref_snap);
+		fprintf(stderr, "WARNING: storeTAI128() %16llu %8u %8llu %d\n", tai, nref, stop, nref_snap);
 	}
 	fwrite(&tai, sizeof(tai), 1, fp);
 	fwrite(&nref, sizeof(nref), 1, fp);
