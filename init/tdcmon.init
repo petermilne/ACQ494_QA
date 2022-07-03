@@ -1,13 +1,15 @@
 
 echo ++tdcmon.init
-ttyd -R -p 8080 watch -n2 /usr/local/CARE/TDC/monitor 1 8   2>&1 &
-ttyd -R -p 8081 watch -n2 /usr/local/CARE/TDC/monitor 2 20  2>&1 &
-ttyd -p 8082 /bin/login 2>&1 &
+ttyd -R -p 8080 watch -n1 /usr/local/CARE/TDC/monitor 1 8   2>&1 &
+ttyd -R -p 8081 watch -n1 /usr/local/CARE/TDC/monitor 2 20  2>&1 &
+ttyd -R -p 8082 nice  /tmp/gpx2_decode --TAIGUI=1 -M 10 -d1 &
+#ttyd -p 6666 /bin/login 2>&1 &
 
 SERVER=$(/usr/local/CARE/get-ip-address)
 sed -i /var/www/d-tacq/acq_home_page.html \
  -e"/CUSTOM/i <p class=\"acqDetail\">TDS Data View Terminals<br>" \
  -e"/CUSTOM/i <a class=\"acqLink\" href=\"http://${SERVER}:8080/\" onClick=\"return popup\(this, 'TDC monitor event seconds'\)\">monitor event seconds</a><br>" \
  -e"/CUSTOM/i <a class=\"acqLink\" href=\"http://${SERVER}:8081/\" onClick=\"return popup\(this, 'TDC monitor event fields'\)\">monitor event fields</a><br>" \
+ -e"/CUSTOM/i <a class=\"acqLink\" href=\"http://${SERVER}:8082/\" onClick=\"return popup\(this, 'TDC monitor event fields'\)\">monitor TAI</a><br>" \
  -e"/CUSTOM/i </p>"
 

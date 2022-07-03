@@ -25,5 +25,5 @@ colorize() {
 	cat -
 }
 
-mmap -f /dev/acq400.0.hb/002 | /usr/local/bin/gpx2_decode -M$max -d$mode 2>&1 | colorize
+/usr/local/bin/slowmon.tcl | /usr/local/bin/gpx2_decode -M$max -d$mode 2>&1 | colorize
 
