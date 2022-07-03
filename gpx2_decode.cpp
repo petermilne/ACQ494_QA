@@ -43,6 +43,8 @@ namespace G {		/* put any globals in here */
 	int max_events = -1;
 	int taigui = 0; 		// run gui exclusive
 	const char* strftime_fmt = "%Y%m%d:%H:%M:%S";
+
+	int stream_1588v2 = 0;		// exclusive streaming mode
 };
 
 struct ChannelData;
@@ -108,6 +110,9 @@ struct poptOption opt_table[] = {
 	},
 	{
 	  "TAIGUI", 'g', POPT_ARG_INT, &G::taigui, 0, "run a gui showing current TAI and surrounding events"
+	},
+	{
+	  "1588v2_stream", 's', POPT_ARG_INT, &G::stream_1588v2, 0, "stream iee1588v2 binary data"
 	},
 	POPT_AUTOHELP
 	POPT_TABLEEND
@@ -251,15 +256,10 @@ int taigui_handle_buffer(int ibuf, FILE* fp) {
 
 	for (int event = 0;
 		fread(&tmp, sizeof(long long), 1, fp) == 1; ){
-		if ((tmp&GPX_FILLER_MASK) == GPX_FILLER){
-			continue;
-		}
+
 		if (G::verbose > 2){
 			fprintf(stderr, "%d,%016llx\n", event, tmp);
 		}
-
-
-
 		if ((tmp&GPX_FILLER_MASK) == GPX_FILLER){
 			continue;
 		}
@@ -332,6 +332,69 @@ int taigui(void)
 	return 0;
 }
 
+
+int do_stream_1588v2(int ibuf, FILE* fp) {
+	static unsigned long long tai;
+	bool found_pps = false;
+	unsigned long long tmp;
+
+	for (int event = 0;
+		fread(&tmp, sizeof(long long), 1, fp) == 1; ){
+
+		if (G::verbose > 2){
+			fprintf(stderr, "%d,%016llx\n", event, tmp);
+		}
+
+		if ((tmp&GPX_FILLER_MASK) == GPX_FILLER){
+			continue;
+		}
+
+		short nref_snap;
+
+		if (gpx2_is_pps(tmp, tai, nref_snap)) {
+			found_pps = true;
+			continue;
+		}
+		if (found_pps){
+			unsigned nref, stop, sc;
+			gpx_from_raw(tmp, sc, nref, stop);
+
+			if (gpx2_valid_sc(sc)){
+				storeTAI128(stdout, tai, nref, stop, nref_snap);
+			}else{
+				fprintf(stderr, "data not valid %016llx\n", tmp);
+				return 1;
+			}
+		}
+	}
+
+	return 0;
+}
+int do_stream_1588v2(void)
+// live display of current TAI and +/-G::max_events events
+{
+	FILE* fp = fopen(BQF, "r");
+	if (fp == 0){
+		perror(BQF);
+		return -1;
+	}
+	char bqline[32];
+	while(fgets(bqline, 32, fp)){
+		char bufname[80];
+		int ibuf = atoi(bqline);
+		snprintf(bufname, 80, HBF, ibuf);
+		FILE* bfp = fopen(bufname, "r");
+		if (bfp == 0){
+			perror(bufname);
+			return -2;
+		}
+		do_stream_1588v2(ibuf, bfp);
+		fclose(bfp);
+	}
+	fclose(fp);
+	return 0;
+}
+
 void ui(int argc, const char** argv)
 {
 	poptContext opt_context =
@@ -351,7 +414,9 @@ void ui(int argc, const char** argv)
 int main(int argc, const char* argv[])
 {
 	ui(argc, argv);
-	if (G::taigui){
+	if (G::stream_1588v2){
+		return do_stream_1588v2();
+	}else if (G::taigui){
 		return taigui();
 	}else{
 		return decode();

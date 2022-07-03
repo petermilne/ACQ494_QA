@@ -2,9 +2,11 @@
 echo ++tdcmon.init
 ttyd -R -p 8080 watch -n1 /usr/local/CARE/TDC/monitor 1 8   2>&1 &
 ttyd -R -p 8081 watch -n1 /usr/local/CARE/TDC/monitor 2 20  2>&1 &
-ttyd -R -p 8082 nice  /tmp/gpx2_decode --TAIGUI=1 -M 10 -d1 &
+ttyd -R -p 8082 nice  /usr/local/bin/gpx2_decode --TAIGUI=1 -M 10 -d1 &
 #ttyd -p 6666 /bin/login 2>&1 &
-
+killall -q inetd
+echo "54999 stream tcp nowait root /usr/local/bin/gpx2_decode gpx2_decode --1588v2_stream=1" >>/etc/inetd.conf
+inetd /etc/inetd.conf
 SERVER=$(/usr/local/CARE/get-ip-address)
 sed -i /var/www/d-tacq/acq_home_page.html \
  -e"/CUSTOM/i <p class=\"acqDetail\">TDS Data View Terminals<br>" \
