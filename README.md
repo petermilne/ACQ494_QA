@@ -1,3 +1,9 @@
+# ACQ494_QA
+
+Dual purpose package
+- compiles on host, acquires, decodes analyses data
+- embedded package for live decode
+
 # ACQ494 Channel ID
 
 11 : Site 1 Channel 1
@@ -8,8 +14,9 @@
 ## Assumed directory structure
 
 ```bash
+~/PROJECTS/ACQ494_QA	  # this code
+~/PROJECTS/ACQ400         # main ARM runtime (if cross compiling)
 ~/PROJECTS/acq400_hapi    # copy of latest HAPI
-~/PROJECTS/ACQ494_QA
 ```
 
 ### Install at D-TACQ

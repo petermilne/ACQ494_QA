@@ -41,6 +41,8 @@ namespace G {		/* put any globals in here */
 	int do1588v2 = 0;
 	int doTAI128 = 0;
 	int max_events = -1;
+	int taigui = 0; 		// run gui exclusive
+	const char* strftime_fmt = "%Y%m%d:%H:%M:%S";
 };
 
 struct ChannelData;
@@ -103,6 +105,9 @@ struct poptOption opt_table[] = {
 	},
 	{
 	  "verbose", 'd', POPT_ARG_INT, &G::verbose, 0, "set debug level"
+	},
+	{
+	  "TAIGUI", 'g', POPT_ARG_INT, &G::taigui, 0, "run a gui showing current TAI and surrounding events"
 	},
 	POPT_AUTOHELP
 	POPT_TABLEEND
@@ -230,6 +235,102 @@ int decode(void)
 	return 0;
 }
 
+#define CLEARSCR	"\033[2J"
+#define HOME		"\033[H"
+
+const char* timestr(char* buf, int maxbuf, unsigned long long tai)
+{
+	time_t now = (time_t)tai;
+	strftime(buf, maxbuf, G::strftime_fmt, localtime(&now));
+	return buf;
+}
+int taigui_handle_buffer(int ibuf, FILE* fp) {
+	unsigned long long tmp;
+	bool header_printed = false;
+	bool found_pps = false;
+
+	for (int event = 0;
+		fread(&tmp, sizeof(long long), 1, fp) == 1; ){
+		if ((tmp&GPX_FILLER_MASK) == GPX_FILLER){
+			continue;
+		}
+		if (G::verbose > 2){
+			fprintf(stderr, "%d,%016llx\n", event, tmp);
+		}
+
+
+
+		if ((tmp&GPX_FILLER_MASK) == GPX_FILLER){
+			continue;
+		}
+
+		unsigned long long tai;
+		short nref_snap;
+
+		if (gpx2_is_pps(tmp, tai, nref_snap)) {
+			if (G::verbose){
+#define NTS			80
+				char ts[NTS];
+				fprintf(stderr, CLEARSCR HOME);
+				fprintf(stderr, "buffer:%03d\n", ibuf);
+				fprintf(stderr, "%6s,%2s,%32s,%30s\n", "event", "sc", "tai", "tai date");
+				fprintf(stderr, "%6d,%2x,%32llu,%30s\n", event, PPSSIG, tai, timestr(ts, NTS, tai));
+			}
+			found_pps = true;
+			continue;
+		}
+		if (found_pps){
+			unsigned nref, stop, sc;
+			gpx_from_raw(tmp, sc, nref, stop);
+
+			if (gpx2_valid_sc(sc)){
+				if (!header_printed){
+					fprintf(stderr, "%6s,%2s,%32s,%8s,%8s\n", "event", "sc", "tai", "nref", "stop");
+					header_printed = true;
+				}
+				fprintf(stderr, "%6d,%2d,%32llu,%8d,%8d\n", event, sc, tai, nref, stop);
+				if (++event > G::max_events){
+					found_pps = false;
+					event = 0;
+				}
+			}else{
+				fprintf(stderr, "data not valid\n");
+				return 1;
+			}
+		}
+	}
+}
+
+#define BQF "/dev/acq400.0.bqf"
+#define HBF "/dev/acq400.0.hb/%03d"
+
+int taigui(void)
+// live display of current TAI and +/-G::max_events events
+{
+	FILE* fp = fopen(BQF, "r");
+	if (fp == 0){
+		perror(BQF);
+		return -1;
+	}
+	char bqline[32];
+	while(fgets(bqline, 32, fp)){
+		char bufname[80];
+		int ibuf = atoi(bqline);
+		snprintf(bufname, 80, HBF, ibuf);
+		FILE* bfp = fopen(bufname, "r");
+		if (bfp == 0){
+			perror(bufname);
+			return -2;
+		}
+		if (G::verbose){
+			fprintf(stderr, "%03d\n", ibuf);
+		}
+		taigui_handle_buffer(ibuf, bfp);
+		fclose(bfp);
+	}
+	fclose(fp);
+	return 0;
+}
 
 void ui(int argc, const char** argv)
 {
@@ -250,5 +351,9 @@ void ui(int argc, const char** argv)
 int main(int argc, const char* argv[])
 {
 	ui(argc, argv);
-	return decode();
+	if (G::taigui){
+		return taigui();
+	}else{
+		return decode();
+	}
 }
