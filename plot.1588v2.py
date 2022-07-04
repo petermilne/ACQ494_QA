@@ -11,7 +11,7 @@ path = sys.argv[1]
 
 try:
    uut = acq400_hapi.factory(sys.argv[2])
-   m = re.search(r'gpx2_([0-9])([0-9]).TAI128', path)
+   m = re.search(r'gpx2_([0-9])([0-9]).*', path)
    site = m.group(1)
    ch = m.group(2)
    serial = uut.svc['s{}'.format(site)].SERIAL
@@ -42,7 +42,7 @@ shot_times_ref = np.add(shot_sec, np.multiply(times['ns'], 1e-9))
 shot_times = np.add(shot_times_ref, np.multiply(times['ps'], 1e-12))
 
 def make_title(serial, ch, stops):
-    title = 'ACQ494FMC Delta Times {} ch {}'.format(serial, ch)
+    title = 'ACQ494FMC Delta Times {} {} ch {}'.format(uut.uut, serial, ch)
     m = np.mean(stops)
     s = np.std(stops)*1e6
     p = np.ptp(stops)*1e6

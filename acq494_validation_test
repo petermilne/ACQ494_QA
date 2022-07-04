@@ -1,7 +1,8 @@
 #!/bin/bash
 
-UUT="${1:-acq2106_188}"
+UUT="${*:-acq2106_188}"
 POST=${POST:-1000000}
+TRG=${TRG:-int,rising}  	# set ext,rising for WRTT0
 
 if [ ! -e ../acq400_hapi ]; then
 	echo "ERROR ../acq400_hapi NOT FOUND"
