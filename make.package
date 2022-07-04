@@ -3,7 +3,8 @@
 DC=$(date +%y%m%d%H%M)
 SEQ=35
 PKG=tdcmon
-PACKAGES=../../PACKAGES.OPT
+#PACKAGES=../../PACKAGES.OPT
+PACKAGES=../ACQ400/PACKAGES.OPT/
 
 rm -Rf opkg/*
 mkdir -p opkg release opkg/usr/local/init opkg/usr/local/CARE opkg/usr/local/bin
@@ -17,6 +18,13 @@ cp gpx2_decode opkg/usr/local/bin
 tar cvzf release/${SEQ}-${PKG}-${DC}.tgz -C opkg .
 ls -l release/${SEQ}-${PKG}-${DC}.tgz
 rm -f ${PACKAGES}/${SEQ}-${PKG}*
-cp release/${SEQ}-${PKG}-${DC}.tgz ${PACKAGES}
+
+if [ ! -e $PACKAGES ]; then
+	echo "ERROR $PACKAGES does not exist"
+	exit 1
+else
+	(cd $PACKAGES; pwd)
+	cp release/${SEQ}-${PKG}-${DC}.tgz ${PACKAGES}
+fi
 
 
