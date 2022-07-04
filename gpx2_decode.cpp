@@ -255,7 +255,9 @@ const char* timestr(char* buf, int maxbuf, unsigned long long tai)
 int taigui_handle_buffer(int ibuf, FILE* fp) {
 	unsigned long long tmp;
 	bool header_printed = false;
-	bool found_pps = false;
+	unsigned found_pps = false;
+	unsigned filler_count = 0;
+	unsigned event_count = 0;
 
 	for (int event = 0;
 		fread(&tmp, sizeof(long long), 1, fp) == 1; ){
@@ -264,6 +266,7 @@ int taigui_handle_buffer(int ibuf, FILE* fp) {
 			fprintf(stderr, "%d,%016llx\n", event, tmp);
 		}
 		if ((tmp&GPX_FILLER_MASK) == GPX_FILLER){
+			++filler_count;
 			continue;
 		}
 
@@ -281,6 +284,8 @@ int taigui_handle_buffer(int ibuf, FILE* fp) {
 			}
 			found_pps = true;
 			continue;
+		}else{
+			++event_count;
 		}
 		if (found_pps){
 			unsigned nref, stop, sc;
@@ -302,6 +307,10 @@ int taigui_handle_buffer(int ibuf, FILE* fp) {
 			}
 		}
 	}
+	if (G::verbose){
+		fprintf(stderr, "%03u,%u,%u,%u\n", ibuf, found_pps, event_count, filler_count);
+	}
+	return 0;
 }
 
 #define BQF "/dev/acq400.0.bqf"
@@ -325,9 +334,7 @@ int taigui(void)
 			perror(bufname);
 			return -2;
 		}
-		if (G::verbose){
-			fprintf(stderr, "%03d,", ibuf); fflush(stderr);
-		}
+
 		taigui_handle_buffer(ibuf, bfp);
 		fclose(bfp);
 	}
