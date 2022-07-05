@@ -68,6 +68,49 @@ F49420002.2.png
 F49420002.4.png
 format					# ignore (for kst)
 gpx2_14.dat				# current decoded data (double seconds), channel 14
+
+
+./plot_compare.1588v2.py ACQ494/acq2106_188/gpx2_11.1588v2 ACQ494/acq2106_054/gpx2_11.1588v2
+```
+
+### IEEE1588v2 data
+
+```
+Standard format, recommended for interchange
+ * https://www.intel.com/content/www/us/en/docs/programmable/683639/21-1-19-4-0/ptp-timestamp-and-tod-formats.html
+ * Bits [95:48]: Seconds (48 bits).
+ * Bits [47:16]: Nanoseconds (32 bits). This field overflows at 1 billion.
+ * Bits [15:0]: Fractions of nanosecond (16 bits). This field is a true fraction; it overflows at 0xFFFF.
+```
+
+gpx2decode can generate this data format as follows:
+
+```
+gpx2decode --1588v2=1 < DATA
+..
+this generates a file
+gpx2_SC.1588v2
+
+Where S = Site and C is channel  eg
+gpx2_11.1588v2   : Site1, Channel1
+
+A file is generated per channel found in the data set.
+```
+
+This format is OK for data transfer, but it's NOT suitable for math in python
+Instead we convert to "TAI128":
+
+```
+ * Bits [127:64]: Seconds (64 bits).
+ * Bits [63:32]: Nanoseconds (32 bits). This field overflows at 1 billion.
+ * Bits [31:0]:  Picoseconds
+```
+
+The types are represented in numpy as:
+
+```python
+    ieee1588v2 = np.dtype([('b96', np.uint16, (6,))])
+    taitype = np.dtype([('tai', np.uint64), ('ns', np.uint32), ('ps', np.uint32)])
 ```
 
 ## low level toolz

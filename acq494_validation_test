@@ -25,6 +25,7 @@ for uut in $UUT; do
 	sha1sum gpx2*.dat
 	mkdir -p $uut; mv gpx2* $uut
 	( cd $uut
+# use this stanza when samping the ref
 #		for file in gpx2*dat; do
 #		../../gpx2_plot_stops.py --times=$file ${UUT}
 #done
