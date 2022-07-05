@@ -68,7 +68,18 @@ F49420002.2.png
 F49420002.4.png
 format					# ignore (for kst)
 gpx2_14.dat				# current decoded data (double seconds), channel 14
+```
 
+## WR Synchronized Test:
+
+```
+TRG=ext,rising ./acq494_validation_test acq2106_188 acq2106_054
+
+# on cs-studio, observe both boxes are at ARM, and press WRTD_TXI
+
+./plot_compare.1588v2.py ACQ494/acq2106_188/gpx2_11.1588v2 ACQ494/acq2106_054/gpx2_11.1588v2
+
+```
 
 ./plot_compare.1588v2.py ACQ494/acq2106_188/gpx2_11.1588v2 ACQ494/acq2106_054/gpx2_11.1588v2
 ```
