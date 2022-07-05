@@ -30,6 +30,8 @@
 #include "popt.h"
 #include <vector>
 #include <map>
+#include <time.h>
+#include <stdlib.h>
 
 using namespace std;
 
