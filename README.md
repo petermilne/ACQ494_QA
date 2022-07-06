@@ -46,6 +46,14 @@ make
 
 ## Capture, Decode, Analyse
 
+### Set PYTHONPATH to enable HAPI, eg
+
+```bash
+pushd ../acq400_hapi; . ./setpath; popd
+```
+
+### now run the test
+
 ```bash
 ./acq494_validation_test [UUT] [1000000]
 
