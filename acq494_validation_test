@@ -16,7 +16,7 @@ fi
 mkdir -p ACQ494
 
 #export SITECLIENT_TRACE=1
-python3 $HAPI/user_apps/acq400/acq400_upload.py --save_data ACQ494 \
+python3 $HAPI/user_apps/acq400/acq400_fullshot.py --save_data ACQ494 \
 	--post=$POST --trg=${TRG} --auto_soft_trigger 1 \
 	--trace_upload=1 --demux=0 --capture=1 ${UUT}
 ( cd ACQ494
